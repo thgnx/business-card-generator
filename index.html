@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Card Generator — tahagenc</title>
+  <meta name="description"
+    content="Free online business card generator. Design, customize and export your card as PNG or PDF.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=QavCLGJGWWNiZgFzVcq84_483YTdNd07JT7hz7PdAfArlmyRK55__T0gghp2ekUtH9e5auakrQ-sN53VjU2GfMoSJfMiavN0QWVNhoUTEEm_D6Twzkn8s8kxXbziYFfUTCtJGTWr95D4PQ2BKm3j94bcsCGqPZjnILv9Ndiuszw" charset="UTF-8"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --surface2: #1a1a1a;
+      --border: rgba(255, 255, 255, 0.08);
+      --border2: rgba(255, 255, 255, 0.14);
+      --text: #f0ece0;
+      --text2: #888880;
+      --text3: #555550;
+      --accent: #c9a84c;
+      --accent2: rgba(201, 168, 76, 0.12);
+      --radius: 10px;
+      --radius2: 6px;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* NAV */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      height: 56px;
+      background: rgba(10, 10, 10, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 18px;
+      letter-spacing: .02em;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .nav-logo span {
+      color: var(--accent);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .nav-links a {
+      font-size: 13px;
+      color: var(--text2);
+      text-decoration: none;
+      transition: color .15s;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      padding: 64px 24px 48px;
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent2);
+      padding: 5px 14px;
+      border-radius: 99px;
+      border: 0.5px solid rgba(201, 168, 76, .25);
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(36px, 5vw, 56px);
+      font-weight: 400;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      letter-spacing: -.01em;
+    }
+
+    .hero h1 em {
+      color: var(--accent);
+      font-style: normal;
+    }
+
+    .hero p {
+      font-size: 16px;
+      color: var(--text2);
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* APP LAYOUT */
+    .app-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 0;
+      border: 0.5px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      border-right: 0.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      max-height: 760px;
+      background: var(--surface);
+    }
+
+    .sb-section {
+      padding: 16px;
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .sb-section:last-child {
+      border-bottom: none;
+      flex: 1;
+    }
+
+    .sb-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 12px;
+    }
+
+    /* THEME GRID */
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .theme-btn {
+      height: 32px;
+      border-radius: var(--radius2);
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform .1s, border-color .1s;
+    }
+
+    .theme-btn:hover {
+      transform: scale(1.08);
+    }
+
+    .theme-btn.active {
+      border-color: #fff !important;
+    }
+
+    /* LAYOUT BTNS */
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .layout-btn {
+      padding: 8px 4px;
+      font-size: 12px;
+      font-family: 'DM Sans', sans-serif;
+      border: 0.5px solid var(--border2);
+      border-radius: var(--radius2);
+      background: var(--surface2);
+      color: var(--text2);
+      cursor: pointer;
+      text-align: center;
+      transition: all .1s;
+    }
+
+    .layout-btn:hover {
+      color: var(--text);
+      border-color: rgba(255, 255, 255, .25);
+    }
+
+    .layout-btn.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* FONT SELECT */
+    select {
+      width: 100%;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      border: 0.5px solid var(--border2);
+      border-radius: var(--radius2);
+      background: var(--surface2);
+      color: var(--text);
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 30px;
+    }
+
+    select:focus {
+      border-color: var(--accent);
+    }
+
+    /* FIELDS */
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field-row {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .field-row label {
+      font-size: 11px;
+      color: var(--text3);
+      letter-spacing: .02em;
+    }
+
+    .field-row input {
+      width: 100%;
+      padding: 7px 10px;
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      border: 0.5px solid var(--border2);
+      border-radius: var(--radius2);
+      background: var(--surface2);
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s;
+    }
+
+    .field-row input:focus {
+      border-color: var(--accent);
+    }
+
+    .field-row input::placeholder {
+      color: var(--text3);
+    }
+
+    /* UPLOAD */
+    .upload-area {
+      border: 1px dashed var(--border2);
+      border-radius: var(--radius2);
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--text2);
+      transition: all .15s;
+    }
+
+    .upload-area:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    .upload-area input {
+      display: none;
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-preview {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+      border-radius: 4px;
+      border: 0.5px solid var(--border2);
+    }
+
+    .logo-name {
+      font-size: 12px;
+      color: var(--text2);
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .remove-btn {
+      background: none;
+      border: none;
+      color: var(--text3);
+      cursor: pointer;
+      padding: 4px;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .remove-btn:hover {
+      color: var(--text);
+    }
+
+    /* TOGGLE */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 0;
+    }
+
+    .toggle-row label:first-child {
+      font-size: 13px;
+      color: var(--text2);
+    }
+
+    .toggle {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      background: var(--surface2);
+      border: 0.5px solid var(--border2);
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .slider:before {
+      content: '';
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      left: 2px;
+      top: 2px;
+      border-radius: 50%;
+      background: var(--text3);
+      transition: .2s;
+    }
+
+    .toggle input:checked+.slider {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .toggle input:checked+.slider:before {
+      transform: translateX(16px);
+      background: #000;
+    }
+
+    /* CANVAS AREA */
+    .canvas-area {
+      background: #070707;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 28px;
+      gap: 24px;
+      min-height: 500px;
+    }
+
+    .card-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+      width: 100%;
+    }
+
+    .card-wrap {
+      width: 100%;
+      max-width: 540px;
+    }
+
+    .card-label {
+      font-size: 10px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 8px;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, .6);
+    }
+
+    /* ACTIONS */
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+      border-radius: var(--radius2);
+      cursor: pointer;
+      border: 0.5px solid var(--border2);
+      background: var(--surface2);
+      color: var(--text);
+      transition: all .15s;
+    }
+
+    .btn:hover {
+      background: var(--surface);
+      border-color: rgba(255, 255, 255, .25);
+    }
+
+    .btn-accent {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+
+    .btn-accent:hover {
+      opacity: .88;
+    }
+
+    .canvas-note {
+      font-size: 11px;
+      color: var(--text3);
+      letter-spacing: .03em;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 0.5px solid var(--border);
+      padding: 28px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer-left {
+      font-size: 13px;
+      color: var(--text3);
+    }
+
+    .footer-left a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .footer-left a:hover {
+      text-decoration: underline;
+    }
+
+    .footer-right {
+      font-size: 12px;
+      color: var(--text3);
+      display: flex;
+      gap: 20px;
+    }
+
+    .footer-right a {
+      color: var(--text3);
+      text-decoration: none;
+      transition: color .15s;
+    }
+
+    .footer-right a:hover {
+      color: var(--text);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 720px) {
+      nav {
+        padding: 0 16px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .hero {
+        padding: 40px 16px 32px;
+      }
+
+      .app-wrap {
+        padding: 24px 12px 60px;
+      }
+
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        max-height: none;
+        border-right: none;
+        border-bottom: 0.5px solid var(--border);
+      }
+
+      .canvas-area {
+        padding: 28px 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+    <a href="/" class="nav-logo">tahagenc<span>.</span></a>
+    <div class="nav-links">
+      <a href="/">Ana Sayfa</a>
+      <a href="/#projects">Projeler</a>
+      <a href="/#contact">İletişim</a>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-tag"><i class="ti ti-credit-card"></i> Ücretsiz Araç</div>
+    <h1>Business Card<br><em>Generator</em></h1>
+    <p>Kartvizitini tasarla, özelleştir ve PNG veya PDF olarak indir. Hiç kayıt gerekmez.</p>
+  </div>
+
+  <div class="app-wrap">
+    <div class="app">
+
+      <div class="sidebar">
+
+        <div class="sb-section">
+          <div class="sb-label">Tema</div>
+          <div class="theme-grid" id="theme-grid"></div>
+        </div>
+
+        <div class="sb-section">
+          <div class="sb-label">Düzen</div>
+          <div class="layout-grid">
+            <button class="layout-btn active" data-layout="classic" onclick="setLayout('classic')">Klasik</button>
+            <button class="layout-btn" data-layout="centered" onclick="setLayout('centered')">Ortalı</button>
+            <button class="layout-btn" data-layout="minimal" onclick="setLayout('minimal')">Minimal</button>
+            <button class="layout-btn" data-layout="bold" onclick="setLayout('bold')">Kalın</button>
+          </div>
+        </div>
+
+        <div class="sb-section">
+          <div class="sb-label">Font</div>
+          <div class="field-row">
+            <select id="f-font" onchange="render()">
+              <option value="'DM Sans', sans-serif">DM Sans (Varsayılan)</option>
+              <option value="'DM Serif Display', Georgia, serif">DM Serif Display</option>
+              <option value="Georgia, serif">Georgia</option>
+              <option value="'Courier New', monospace">Courier New (Mono)</option>
+              <option value="'Century Gothic', 'Futura', sans-serif">Century Gothic</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="sb-section">
+          <div class="sb-label">Logo / Fotoğraf</div>
+          <div id="logo-container">
+            <div class="upload-area" onclick="document.getElementById('logo-input').click()">
+              <i class="ti ti-upload" style="font-size:22px;display:block;margin-bottom:6px"></i>
+              PNG veya JPG yükle
+              <input type="file" id="logo-input" accept="image/*" onchange="handleLogo(event)">
+            </div>
+          </div>
+          <div class="toggle-row" style="margin-top:10px">
+            <label>Daire çerçeve</label>
+            <label class="toggle"><input type="checkbox" id="logo-circle" onchange="render()"><span
+                class="slider"></span></label>
+          </div>
+        </div>
+
+        <div class="sb-section">
+          <div class="sb-label">Ön Yüz — Bilgiler</div>
+          <div class="field-group">
+            <div class="field-row"><label>Ad Soyad</label><input id="f-name" type="text" value="Taha Genç"
+                oninput="render()"></div>
+            <div class="field-row"><label>Unvan</label><input id="f-title" type="text" value="Software Developer"
+                oninput="render()"></div>
+            <div class="field-row"><label>Şirket</label><input id="f-company" type="text" value="tahagenc.com"
+                oninput="render()"></div>
+            <div class="field-row"><label>E-posta</label><input id="f-email" type="text" value="info@tahagenc.com"
+                oninput="render()"></div>
+            <div class="field-row"><label>Telefon</label><input id="f-phone" type="text" value="+90 555 555 55 55"
+                oninput="render()"></div>
+            <div class="field-row"><label>Web sitesi</label><input id="f-web" type="text" value="tahagenc.com"
+                oninput="render()"></div>
+          </div>
+        </div>
+
+        <div class="sb-section">
+          <div class="sb-label">Arka Yüz</div>
+          <div class="toggle-row">
+            <label>Arka yüz aktif</label>
+            <label class="toggle"><input type="checkbox" id="back-toggle" onchange="renderBack()"><span
+                class="slider"></span></label>
+          </div>
+          <div class="field-group" style="margin-top:12px">
+            <div class="field-row"><label>Slogan</label><input id="b-slogan" type="text"
+                value="Building clean web experiences." oninput="renderBack()"></div>
+            <div class="field-row"><label>Web / Sosyal</label><input id="b-web" type="text" value="github.com/thgnx"
+                oninput="renderBack()"></div>
+            <div class="toggle-row">
+              <label>QR Kod</label>
+              <label class="toggle"><input type="checkbox" id="qr-toggle" checked onchange="renderBack()"><span
+                  class="slider"></span></label>
+            </div>
+            <div class="field-row"><label>QR Hedef URL</label><input id="qr-url" type="text"
+                value="https://tahagenc.com" oninput="scheduleQR()"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="canvas-area">
+        <div class="card-stack">
+          <div class="card-wrap">
+            <div class="card-label">Ön Yüz</div>
+            <canvas id="front-canvas" width="900" height="504"></canvas>
+          </div>
+          <div class="card-wrap" id="back-wrap" style="display:none">
+            <div class="card-label">Arka Yüz</div>
+            <canvas id="back-canvas" width="900" height="504"></canvas>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" onclick="downloadPNG()">
+            <i class="ti ti-photo"></i> PNG (Ön)
+          </button>
+          <button class="btn" id="btn-back-png" style="display:none" onclick="downloadPNGBack()">
+            <i class="ti ti-photo"></i> PNG (Arka)
+          </button>
+          <button class="btn btn-accent" onclick="downloadPDF()">
+            <i class="ti ti-file-type-pdf"></i> PDF İndir
+          </button>
+        </div>
+        <div class="canvas-note">Standart kartvizit — 90 × 50 mm · 300 DPI</div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-left">
+      Bir <a href="/">tahagenc</a> aracı — ücretsiz &amp; kayıt gerektirmez
+    </div>
+    <div class="footer-right">
+      <a href="/">Ana Sayfa</a>
+      <a href="https://github.com/thgnx" target="_blank" rel="noopener">GitHub</a>
+      <a href="mailto:info@tahagenc.com">İletişim</a>
+    </div>
+  </footer>
+
+  <script>
+    const themes = [
+      { id: 'midnight', name: 'Gece', bg: '#0a0a0a', fg: '#ffffff', accent: '#c9a84c', sub: '#888888' },
+      { id: 'obsidian', name: 'Obsidyen', bg: '#111418', fg: '#f0ece0', accent: '#d4a853', sub: '#7a7060' },
+      { id: 'slate', name: 'Arduvaz', bg: '#1c2431', fg: '#e8edf5', accent: '#6b9ed4', sub: '#6a7a8e' },
+      { id: 'forest', name: 'Orman', bg: '#0d1f17', fg: '#d4ead9', accent: '#4caa6a', sub: '#567860' },
+      { id: 'ivory', name: 'Fildişi', bg: '#f7f4ee', fg: '#1a1814', accent: '#8b6914', sub: '#7a7060' },
+      { id: 'paper', name: 'Kağıt', bg: '#fafafa', fg: '#111111', accent: '#333333', sub: '#888888' },
+      { id: 'coral', name: 'Mercan', bg: '#1a0f0d', fg: '#f5e8e0', accent: '#d4654a', sub: '#7a5048' },
+      { id: 'graphite', name: 'Grafit', bg: '#2a2a2a', fg: '#e8e8e8', accent: '#aaaaaa', sub: '#666666' },
+    ];
+
+    let currentTheme = themes[0];
+    let currentLayout = 'classic';
+    let logoImg = null;
+    let qrImage = null;
+    let qrTimer = null;
+
+    function buildThemeGrid() {
+      const grid = document.getElementById('theme-grid');
+      themes.forEach(t => {
+        const btn = document.createElement('div');
+        btn.className = 'theme-btn' + (t.id === currentTheme.id ? ' active' : '');
+        btn.title = t.name;
+        btn.style.background = t.bg;
+        btn.style.borderColor = t.accent;
+        btn.onclick = () => {
+          currentTheme = t;
+          document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          render(); renderBack();
+        };
+        grid.appendChild(btn);
+      });
+    }
+
+    function setLayout(l) {
+      currentLayout = l;
+      document.querySelectorAll('.layout-btn').forEach(b => b.classList.toggle('active', b.dataset.layout === l));
+      render();
+    }
+
+    function handleLogo(e) {
+      const file = e.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => { logoImg = img; render(); renderBack(); };
+        img.src = ev.target.result;
+        document.getElementById('logo-container').innerHTML =
+          `<div class="logo-row">
+        <img src="${ev.target.result}" class="logo-preview">
+        <span class="logo-name">${file.name}</span>
+        <button class="remove-btn" onclick="removeLogo()"><i class="ti ti-x"></i></button>
+      </div>`;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeLogo() {
+      logoImg = null; render(); renderBack();
+      document.getElementById('logo-container').innerHTML =
+        `<div class="upload-area" onclick="document.getElementById('logo-input').click()">
+      <i class="ti ti-upload" style="font-size:22px;display:block;margin-bottom:6px"></i>
+      PNG veya JPG yükle
+      <input type="file" id="logo-input" accept="image/*" onchange="handleLogo(event)">
+    </div>`;
+    }
+
+    function scheduleQR() {
+      clearTimeout(qrTimer);
+      qrTimer = setTimeout(generateQR, 700);
+    }
+
+    function generateQR() {
+      return new Promise(resolve => {
+        const url = document.getElementById('qr-url').value || 'https://tahagenc.com';
+        const tmp = document.createElement('div');
+        tmp.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:200px;height:200px';
+        document.body.appendChild(tmp);
+        try {
+          new QRCode(tmp, {
+            text: url, width: 200, height: 200,
+            colorDark: '#000000', colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+          });
+          setTimeout(() => {
+            const el = tmp.querySelector('img') || tmp.querySelector('canvas');
+            if (el) {
+              const qi = new Image();
+              qi.onload = () => { qrImage = qi; document.body.removeChild(tmp); renderBack(); resolve(); };
+              qi.src = el.tagName === 'CANVAS' ? el.toDataURL() : el.src;
+            } else { document.body.removeChild(tmp); resolve(); }
+          }, 350);
+        } catch (err) { document.body.removeChild(tmp); resolve(); }
+      });
+    }
+
+    function v(id) { return document.getElementById(id).value; }
+    function font() { return v('f-font'); }
+
+    function rr(ctx, x, y, w, h, r) {
+      ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r); ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+    }
+
+    function drawLogo(ctx, x, y, size) {
+      if (!logoImg) return;
+      ctx.save();
+      if (document.getElementById('logo-circle').checked) {
+        ctx.beginPath(); ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2); ctx.clip();
+      }
+      ctx.drawImage(logoImg, x, y, size, size);
+      ctx.restore();
+    }
+
+    function render() {
+      const cv = document.getElementById('front-canvas');
+      const ctx = cv.getContext('2d');
+      const W = 900, H = 504, t = currentTheme;
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = t.bg; rr(ctx, 0, 0, W, H, 16); ctx.fill();
+      const n = v('f-name'), ti = v('f-title'), co = v('f-company'),
+        em = v('f-email'), ph = v('f-phone'), wb = v('f-web'), fo = font();
+      if (currentLayout === 'classic') drawClassic(ctx, W, H, t, n, ti, co, em, ph, wb, fo);
+      else if (currentLayout === 'centered') drawCentered(ctx, W, H, t, n, ti, co, em, ph, wb, fo);
+      else if (currentLayout === 'minimal') drawMinimal(ctx, W, H, t, n, ti, co, em, ph, wb, fo);
+      else if (currentLayout === 'bold') drawBold(ctx, W, H, t, n, ti, co, em, ph, wb, fo);
+    }
+
+    function drawClassic(ctx, W, H, t, name, title, company, email, phone, web, fo) {
+      const px = logoImg ? 136 : 62, cy = H / 2;
+      ctx.fillStyle = t.accent; ctx.fillRect(0, 0, 6, H);
+      if (logoImg) drawLogo(ctx, 26, cy - 44, 84);
+      ctx.font = `600 50px ${fo}`; ctx.fillStyle = t.fg; ctx.fillText(name, px, cy - 34);
+      ctx.font = `400 22px ${fo}`; ctx.fillStyle = t.accent; ctx.fillText(title, px, cy + 4);
+      if (company) { ctx.font = `400 18px ${fo}`; ctx.fillStyle = t.sub; ctx.fillText(company, px, cy + 32); }
+      const rx = W - 62, ly = cy - 16;
+      ctx.font = `400 17px ${fo}`; ctx.fillStyle = t.sub; ctx.textAlign = 'right';
+      if (email) ctx.fillText(email, rx, ly);
+      if (phone) ctx.fillText(phone, rx, ly + 26);
+      if (web) ctx.fillText(web, rx, ly + 52);
+      ctx.textAlign = 'left';
+    }
+
+    function drawCentered(ctx, W, H, t, name, title, company, email, phone, web, fo) {
+      ctx.textAlign = 'center'; const cx = W / 2;
+      let sy = logoImg ? H / 2 - 80 : H / 2 - 60;
+      if (logoImg) { drawLogo(ctx, cx - 38, sy - 12, 76); sy += 94; }
+      ctx.font = `600 50px ${fo}`; ctx.fillStyle = t.fg; ctx.fillText(name, cx, sy);
+      ctx.font = `400 21px ${fo}`; ctx.fillStyle = t.accent; ctx.fillText(title, cx, sy + 36);
+      ctx.font = `400 16px ${fo}`; ctx.fillStyle = t.sub;
+      ctx.fillText([email, phone, web].filter(Boolean).join('  ·  '), cx, sy + 66);
+      if (company) { ctx.font = `300 15px ${fo}`; ctx.fillStyle = t.sub; ctx.fillText(company, cx, sy + 90); }
+      ctx.fillStyle = t.accent; ctx.fillRect(cx - 40, sy - 70, 80, 2);
+      ctx.textAlign = 'left';
+    }
+
+    function drawMinimal(ctx, W, H, t, name, title, company, email, phone, web, fo) {
+      const px = 62, my = H / 2;
+      if (logoImg) drawLogo(ctx, W - 136, my - 42, 84);
+      ctx.font = `300 44px ${fo}`; ctx.fillStyle = t.fg; ctx.fillText(name, px, my - 6);
+      ctx.font = `400 18px ${fo}`; ctx.fillStyle = t.accent; ctx.fillText(title + (company ? ' — ' + company : ''), px, my + 28);
+      ctx.font = `300 14px ${fo}`; ctx.fillStyle = t.sub;
+      ctx.fillText([email, phone, web].filter(Boolean).join('   '), px, my + 56);
+      ctx.fillStyle = t.accent; ctx.fillRect(px, my - 48, 52, 1.5);
+    }
+
+    function drawBold(ctx, W, H, t, name, title, company, email, phone, web, fo) {
+      ctx.fillStyle = t.accent; ctx.fillRect(0, 0, W, H * 0.48);
+      if (logoImg) { ctx.save(); ctx.globalAlpha = .22; drawLogo(ctx, W - 124, 8, H * 0.47 - 8); ctx.restore(); }
+      ctx.font = `700 54px ${fo}`; ctx.fillStyle = t.bg; ctx.fillText(name, 52, H * 0.34);
+      ctx.font = `500 21px ${fo}`; ctx.fillStyle = t.bg; ctx.globalAlpha = .75; ctx.fillText(title, 54, H * 0.43); ctx.globalAlpha = 1;
+      ctx.font = `400 17px ${fo}`; ctx.fillStyle = t.fg;
+      const py = H * 0.61;
+      if (email) ctx.fillText(email, 52, py);
+      if (phone) ctx.fillText(phone, 52, py + 26);
+      if (web) { ctx.fillStyle = t.accent; ctx.fillText(web, 52, py + 52); }
+      if (company) { ctx.textAlign = 'right'; ctx.fillStyle = t.sub; ctx.font = `300 15px ${fo}`; ctx.fillText(company, W - 52, py); ctx.textAlign = 'left'; }
+    }
+
+    function renderBack() {
+      const active = document.getElementById('back-toggle').checked;
+      document.getElementById('back-wrap').style.display = active ? 'block' : 'none';
+      document.getElementById('btn-back-png').style.display = active ? 'inline-flex' : 'none';
+      if (!active) return;
+      const cv = document.getElementById('back-canvas');
+      const ctx = cv.getContext('2d');
+      const W = 900, H = 504, t = currentTheme, fo = font();
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = t.bg; rr(ctx, 0, 0, W, H, 16); ctx.fill();
+      const slogan = v('b-slogan'), bweb = v('b-web');
+      const showQR = document.getElementById('qr-toggle').checked;
+      const hasQR = showQR && qrImage;
+      const cx = hasQR ? W / 2 - 70 : W / 2;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = t.accent; ctx.fillRect(cx - 52, H / 2 - 60, 104, 1.5);
+      ctx.font = `300 28px ${fo}`; ctx.fillStyle = t.fg; ctx.fillText(slogan, cx, H / 2 - 16);
+      ctx.font = `400 18px ${fo}`; ctx.fillStyle = t.accent; ctx.fillText(bweb, cx, H / 2 + 20);
+      if (hasQR) {
+        const qs = 160, qx = W - 200, qy = (H - qs) / 2;
+        ctx.save(); ctx.fillStyle = '#ffffff'; rr(ctx, qx - 10, qy - 10, qs + 20, qs + 20, 10); ctx.fill();
+        ctx.drawImage(qrImage, qx, qy, qs, qs); ctx.restore();
+        ctx.font = `300 12px ${fo}`; ctx.fillStyle = t.sub; ctx.textAlign = 'center';
+        ctx.fillText('Tara', qx + qs / 2, qy + qs + 22);
+      }
+      ctx.fillStyle = t.accent; ctx.fillRect(0, 0, 6, H);
+      ctx.textAlign = 'left';
+    }
+
+    function downloadPNG() {
+      const a = document.createElement('a'); a.download = 'kartvizit-on.png';
+      a.href = document.getElementById('front-canvas').toDataURL('image/png'); a.click();
+    }
+    function downloadPNGBack() {
+      const a = document.createElement('a'); a.download = 'kartvizit-arka.png';
+      a.href = document.getElementById('back-canvas').toDataURL('image/png'); a.click();
+    }
+    function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [90, 50] });
+      doc.addImage(document.getElementById('front-canvas').toDataURL('image/png'), 'PNG', 0, 0, 90, 50);
+      if (document.getElementById('back-toggle').checked) {
+        doc.addPage([90, 50], 'landscape');
+        doc.addImage(document.getElementById('back-canvas').toDataURL('image/png'), 'PNG', 0, 0, 90, 50);
+      }
+      doc.save('kartvizit.pdf');
+    }
+
+    buildThemeGrid();
+    generateQR().then(() => { render(); renderBack(); });
+  </script>
+</body>
+
+</html>
